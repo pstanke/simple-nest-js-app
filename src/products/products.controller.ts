@@ -12,21 +12,36 @@ import {
 import { CreateProductDTO } from './dtos/create-product.dto';
 import { ProductsService } from './products.service';
 import { UpdateProductDTO } from './dtos/update-product.dto';
+import { Product } from '@prisma/client';
 
 @Controller('products')
 export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
-  @Get('/')
-  public getAll(): any {
-    return this.productsService.getAll();
+  @Get()
+  async getAll(): Promise<Product[]> {
+    const products = await this.productsService.getAll();
+    return products;
   }
 
-  @Get('/:id')
-  public async getById(@Param('id', new ParseUUIDPipe()) id: string) {
-    const prod = await this.productsService.getById(id);
-    if (!prod) throw new NotFoundException('Product not found');
-    return prod;
+  @Get('/extended')
+  async getAllExtended(): Promise<Product[]> {
+    const products = await this.productsService.getAllExtended();
+
+    return products;
+  }
+
+  @Get(':id')
+  async getById(@Param('id') id: Product['id']): Promise<Product> {
+    const product = await this.productsService.getById(id);
+    return product;
+  }
+
+  @Get('/extended/:id')
+  async getExtendedById(@Param('id', new ParseUUIDPipe()) id: string) {
+    const product = await this.productsService.getExtendedById(id);
+    if (!product) throw new NotFoundException('Product not found');
+    return product;
   }
 
   @Delete('/:id')
